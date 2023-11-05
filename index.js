@@ -59,6 +59,7 @@ async function run() {
 
         const database = client.db("BlogDB");
         const blogsCollection = database.collection("blogs");
+        const wishlistCollection = database.collection("wishlist");
 
 
         app.post("/jwt", async (req, res) => {
@@ -99,12 +100,20 @@ async function run() {
         app.post("/blogs", async (req, res) => {
 
 
-            console.log('Inside post hitting')
             // console.log(req.body);
 
 
             const blog = req.body;
             const result = await blogsCollection.insertOne(blog);
+            res.send(result);
+
+            console.log(result);
+
+        })
+        app.post("/wishlist", async (req, res) => {
+
+            const blog = req.body;
+            const result = await wishlistCollection.insertOne(blog);
             res.send(result);
 
             console.log(result);
@@ -152,6 +161,27 @@ async function run() {
             const result = await blogsCollection.find(query, options).toArray();
             res.send(result);
         })
+        app.get("/userWishlist/:email", async (req, res) => {
+
+            console.log("get id: ", req.params.email)
+            const getUserEmail = req.params.email;
+
+            const query = { email: getUserEmail }
+            const options = {
+                // Include only the `title` and `imdb` fields in the returned document
+                projection: { title: 1, category: 1, short: 1,image:1 },
+            };
+
+            const result = await wishlistCollection.find(query, options).toArray();
+            res.send(result);
+        })
+
+
+
+
+
+
+
 
 
 
