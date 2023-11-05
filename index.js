@@ -183,6 +183,20 @@ async function run() {
             res.send(result);
         })
 
+        app.delete("/blog/:id", async (req, res) => {
+
+
+            const deleteBlog = req.params.id;
+            const query = { _id: new ObjectId(deleteBlog) };
+
+            const result = await wishlistCollection.deleteOne(query);
+            res.send(result)
+
+
+
+        });
+
+
         // app.get("/bookings",verifyToken, async (req, res) => {
 
         //     console.log(req.query.email);
