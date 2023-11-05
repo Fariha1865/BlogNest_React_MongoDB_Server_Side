@@ -155,26 +155,85 @@ async function run() {
             const query = { _id: new ObjectId(getBlogDetails) }
             const options = {
                 // Include only the `title` and `imdb` fields in the returned document
-                projection: { title: 1, category: 1, short: 1,long: 1,image:1 },
+                projection: { title: 1, category: 1, short: 1, long: 1, image: 1 },
             };
 
             const result = await blogsCollection.find(query, options).toArray();
             res.send(result);
         })
-        app.get("/userWishlist/:email", async (req, res) => {
+        app.get("/userWishlist/:email", verifyToken, async (req, res) => {
+
 
             console.log("get id: ", req.params.email)
             const getUserEmail = req.params.email;
 
+
+            console.log("queryUser" + getUserEmail)
+            console.log('token owner info', req.user)
+            if (req.user?.email !== getUserEmail) {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
             const query = { email: getUserEmail }
             const options = {
                 // Include only the `title` and `imdb` fields in the returned document
-                projection: { title: 1, category: 1, short: 1,image:1 },
+                projection: { title: 1, category: 1, short: 1, image: 1 },
             };
 
             const result = await wishlistCollection.find(query, options).toArray();
             res.send(result);
         })
+
+        // app.get("/bookings",verifyToken, async (req, res) => {
+
+        //     console.log(req.query.email);
+        //     console.log('token owner info', req.user)
+        //     if(req.user?.email !== req.query?.email){
+        //         return res.status(403).send({message: 'forbidden access'})
+        //     }
+        //     let query = {};
+        //     if (req.query?.email) {
+        //         query = { email: req.query.email }
+        //     }
+        //     const cursor = bookingsCollection.find(query);
+        //     const result = await cursor.toArray();
+        //     res.send(result)
+
+        // })
+        // app.get("/service/:id", async (req, res) => {
+
+        //     console.log("get id: ", req.params.id)
+        //     const getServiceDetails = req.params.id;
+
+        //     const query = { _id: new ObjectId(getServiceDetails) }
+        //     const options = {
+        //         // Include only the `title` and `imdb` fields in the returned document
+        //         projection: { title: 1, price:1 ,img:1},
+        //       };
+
+        //     const result = await servicesCollection.find(query,options).toArray();
+        //     res.send(result);
+        // })
+
+        // app.post("/cartProducts/:userEmail", async (req, res) => {
+
+        //     // console.log(req.params.userEmail)
+
+
+        //     try {
+        //         cartProductsCollection = database.collection(`cartProducts${req.params.userEmail}`);
+
+
+
+        //         const product = req.body;
+        //         const result = await cartProductsCollection.insertOne(product);
+        //         res.send(result);
+        //     } catch (error) {
+        //         res.status(500).json({ errorCode: error.code, errorMessage: error.message });
+        //     }
+
+
+
+        // })
 
 
 
