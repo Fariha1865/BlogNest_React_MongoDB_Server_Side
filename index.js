@@ -101,7 +101,6 @@ async function run() {
             const cursor = commentsCollection.find();
             const result = await cursor.toArray();
             res.send(result)
-
         })
 
         app.get("/categoryBlogs/:category", async (req, res) => {
