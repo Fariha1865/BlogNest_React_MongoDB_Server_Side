@@ -60,6 +60,7 @@ async function run() {
         const database = client.db("BlogDB");
         const blogsCollection = database.collection("blogs");
         const wishlistCollection = database.collection("wishlist");
+        const commentsCollection = database.collection("comments");
 
 
         app.post("/jwt", async (req, res) => {
@@ -91,8 +92,13 @@ async function run() {
         app.get("/blogs", async (req, res) => {
 
             console.log("called get blogs")
-            const cursor = 
-            blogsCollection.find();
+            const cursor = blogsCollection.find();
+            const result = await cursor.toArray();
+            res.send(result)
+
+        })
+        app.get("/getComments", async (req, res) => {
+            const cursor = commentsCollection.find();
             const result = await cursor.toArray();
             res.send(result)
 
@@ -143,6 +149,15 @@ async function run() {
             console.log(result);
 
         })
+        app.post("/comments", async (req, res) => {
+
+            const blog = req.body;
+            const result = await commentsCollection.insertOne(blog);
+            res.send(result);
+
+            console.log(result);
+
+        })
         app.put("/blogUpdate/:id", async (req, res) => {
 
             const updatedBlogId = req.params.id;
@@ -179,12 +194,13 @@ async function run() {
             const query = { _id: new ObjectId(getBlogDetails) }
             const options = {
                 // Include only the `title` and `imdb` fields in the returned document
-                projection: { title: 1, category: 1, short: 1, long: 1, image: 1 },
+                projection: { title: 1, category: 1, short: 1, long: 1, image: 1,userImage:1,userName:1,dateTime:1 },
             };
 
             const result = await blogsCollection.find(query, options).toArray();
             res.send(result);
         })
+        
         app.get("/userWishlist/:email", verifyToken, async (req, res) => {
 
 
