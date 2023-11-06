@@ -91,7 +91,8 @@ async function run() {
         app.get("/blogs", async (req, res) => {
 
             console.log("called get blogs")
-            const cursor = blogsCollection.find();
+            const cursor = 
+            blogsCollection.find();
             const result = await cursor.toArray();
             res.send(result)
 
@@ -103,7 +104,6 @@ async function run() {
             const getBlogByCategory = req.params.category;
             if (getBlogByCategory !== "all") {
 
-             
                 const query = { category: getBlogByCategory }
                 const options = {
                     // Include only the `title` and `imdb` fields in the returned document
