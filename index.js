@@ -97,6 +97,30 @@ async function run() {
 
         })
 
+        app.get("/categoryBlogs/:category", async (req, res) => {
+
+            console.log("get category: ", req.params.category)
+            const getBlogByCategory = req.params.category;
+            if (getBlogByCategory !== "all") {
+
+             
+                const query = { category: getBlogByCategory }
+                const options = {
+                    // Include only the `title` and `imdb` fields in the returned document
+                    projection: { title: 1, category: 1, short: 1, long: 1, image: 1 },
+                };
+
+                const result = await blogsCollection.find(query, options).toArray();
+                res.send(result);
+            } else {
+                const cursor = blogsCollection.find();
+                const result = await cursor.toArray();
+                res.send(result)
+            }
+
+
+        })
+
         app.post("/blogs", async (req, res) => {
 
 
