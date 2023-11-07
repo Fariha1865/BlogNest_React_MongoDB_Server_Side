@@ -97,10 +97,18 @@ async function run() {
             res.send(result)
 
         })
-        app.get("/getComments", async (req, res) => {
-            const cursor = commentsCollection.find();
-            const result = await cursor.toArray();
-            res.send(result)
+        app.get("/getComments/:id", async (req, res) => {
+
+            console.log("get category: ", req.params.id)
+            const getCommentId = req.params.id;
+          
+
+                const query = { id: getCommentId }
+
+                const result = await commentsCollection.find(query).toArray();
+                console.log(result)
+                res.send(result);
+          
         })
 
         app.get("/categoryBlogs/:category", async (req, res) => {
@@ -193,7 +201,7 @@ async function run() {
             const query = { _id: new ObjectId(getBlogDetails) }
             const options = {
                 // Include only the `title` and `imdb` fields in the returned document
-                projection: { title: 1, category: 1, short: 1, long: 1, image: 1,userImage:1,userName:1,dateTime:1 },
+                projection: { title: 1, category: 1, short: 1, long: 1, image: 1,userImage:1,userName:1,dateTime:1,userMail:1 },
             };
 
             const result = await blogsCollection.find(query, options).toArray();
