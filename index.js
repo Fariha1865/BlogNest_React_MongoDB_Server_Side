@@ -172,7 +172,6 @@ async function run() {
 
             console.log("blog to update", updatedBlogId)
 
-
             const filter = { _id: new ObjectId(updatedBlogId) }
 
             const options = { upsert: true };
