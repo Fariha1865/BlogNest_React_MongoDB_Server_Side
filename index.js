@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 const corsOptions = {
-    origin: 'https://blognestweb.netlify.app',
+    origin: 'http://localhost:5173',
     credentials: true,
     optionSuccessStatus: 200,
 }
@@ -136,12 +136,15 @@ async function run() {
 
         })
 
-        app.post("/blogs", async (req, res) => {
+        app.post("/blogs",verifyToken, async (req, res) => {
 
 
-            // console.log(req.body);
+           
+            const queryEmail = req.query?.email
 
-
+            if (req.user?.email !== queryEmail) {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
             const blog = req.body;
             const result = await blogsCollection.insertOne(blog);
             res.send(result);
