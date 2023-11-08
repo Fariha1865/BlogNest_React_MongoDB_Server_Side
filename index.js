@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 const corsOptions = {
-    origin: 'http://localhost:5173',
+    origin: 'https://blognestweb.netlify.app',
     credentials: true,
     optionSuccessStatus: 200,
 }
@@ -31,9 +31,10 @@ const verifyToken = (req, res, next) => {
     }
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
         if (err) {
+            console.log("error token")
             return res.status(401).send({ message: 'Unauthorized Access' });
         }
-        console.log(token)
+        // console.log(token)
         req.user = decoded;
         next();
 
@@ -61,6 +62,7 @@ async function run() {
         const blogsCollection = database.collection("blogs");
         const wishlistCollection = database.collection("wishlist");
         const commentsCollection = database.collection("comments");
+ 
 
 
         app.post("/jwt", async (req, res) => {
@@ -84,14 +86,15 @@ async function run() {
         app.post("/logout", async (req, res) => {
 
             const user = req.body;
-            console.log("logging out" + user);
+            // console.log("logging out" + user);
 
-            res.clearCookie('token', { maxAge: 0 }).send({ success: true });
+            res .clearCookie('token', { maxAge: 0, sameSite: 'none', secure: true })
+          .send({ success: true })
 
         })
         app.get("/blogs", async (req, res) => {
 
-            console.log("called get blogs")
+            // console.log("called get blogs")
             const cursor = blogsCollection.find();
             const result = await cursor.toArray();
             res.send(result)
@@ -99,14 +102,14 @@ async function run() {
         })
         app.get("/getComments/:id", async (req, res) => {
 
-            console.log("get category: ", req.params.id)
+            // console.log("get category: ", req.params.id)
             const getCommentId = req.params.id;
           
 
                 const query = { id: getCommentId }
 
                 const result = await commentsCollection.find(query).toArray();
-                console.log(result)
+             
                 res.send(result);
           
         })
@@ -144,7 +147,7 @@ async function run() {
             const result = await blogsCollection.insertOne(blog);
             res.send(result);
 
-            console.log(result);
+         
 
         })
         app.post("/wishlist", async (req, res) => {
@@ -162,7 +165,7 @@ async function run() {
             const result = await commentsCollection.insertOne(blog);
             res.send(result);
 
-            console.log(result);
+     
 
         })
         app.put("/blogUpdate/:id", async (req, res) => {
@@ -170,7 +173,7 @@ async function run() {
             const updatedBlogId = req.params.id;
             const updated = req.body;
 
-            console.log("blog to update", updatedBlogId)
+            // console.log("blog to update", updatedBlogId)
 
             const filter = { _id: new ObjectId(updatedBlogId) }
 
@@ -192,14 +195,19 @@ async function run() {
 
             res.send(result);
         })
-        app.get("/blog/:id", async (req, res) => {
+        app.get("/blog/:id",verifyToken,async (req, res) => {
 
-            console.log("get id: ", req.params.id)
-            const getBlogDetails = req.params.id;
+            // console.log("get id: ", req.params.id)
+            const getBlogDetails = req.params?.id;
+            const queryEmail = req.query?.email;
+            console.log("requested user:" + queryEmail,req.user.email)
 
+            if (req.user?.email !== queryEmail) {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
             const query = { _id: new ObjectId(getBlogDetails) }
             const options = {
-                // Include only the `title` and `imdb` fields in the returned document
+              
                 projection: { title: 1, category: 1, short: 1, long: 1, image: 1,userImage:1,userName:1,dateTime:1,userMail:1 },
             };
 
@@ -214,7 +222,7 @@ async function run() {
             const getUserEmail = req.params.email;
 
 
-            console.log("queryUser" + getUserEmail)
+            console.log("queryUser" +req.user?.email)
             console.log('token owner info', req.user)
             if (req.user?.email !== getUserEmail) {
                 return res.status(403).send({ message: 'forbidden access' })
@@ -233,6 +241,7 @@ async function run() {
 
 
             const deleteBlog = req.params.id;
+
             const query = { _id: new ObjectId(deleteBlog) };
 
             const result = await wishlistCollection.deleteOne(query);
@@ -241,60 +250,6 @@ async function run() {
 
 
         });
-
-
-        // app.get("/bookings",verifyToken, async (req, res) => {
-
-        //     console.log(req.query.email);
-        //     console.log('token owner info', req.user)
-        //     if(req.user?.email !== req.query?.email){
-        //         return res.status(403).send({message: 'forbidden access'})
-        //     }
-        //     let query = {};
-        //     if (req.query?.email) {
-        //         query = { email: req.query.email }
-        //     }
-        //     const cursor = bookingsCollection.find(query);
-        //     const result = await cursor.toArray();
-        //     res.send(result)
-
-        // })
-        // app.get("/service/:id", async (req, res) => {
-
-        //     console.log("get id: ", req.params.id)
-        //     const getServiceDetails = req.params.id;
-
-        //     const query = { _id: new ObjectId(getServiceDetails) }
-        //     const options = {
-        //         // Include only the `title` and `imdb` fields in the returned document
-        //         projection: { title: 1, price:1 ,img:1},
-        //       };
-
-        //     const result = await servicesCollection.find(query,options).toArray();
-        //     res.send(result);
-        // })
-
-        // app.post("/cartProducts/:userEmail", async (req, res) => {
-
-        //     // console.log(req.params.userEmail)
-
-
-        //     try {
-        //         cartProductsCollection = database.collection(`cartProducts${req.params.userEmail}`);
-
-
-
-        //         const product = req.body;
-        //         const result = await cartProductsCollection.insertOne(product);
-        //         res.send(result);
-        //     } catch (error) {
-        //         res.status(500).json({ errorCode: error.code, errorMessage: error.message });
-        //     }
-
-
-
-        // })
-
 
 
         // Send a ping to confirm a successful connection
@@ -310,7 +265,7 @@ run().catch(console.dir);
 
 
 app.get("/", (req, res) => {
-    res.send("Car-Doctor server is running");
+    res.send("Blog server is running");
 })
 
 
