@@ -34,7 +34,6 @@ const verifyToken = (req, res, next) => {
             console.log("error token")
             return res.status(401).send({ message: 'Unauthorized Access' });
         }
-        // console.log(token)
         req.user = decoded;
         next();
 
